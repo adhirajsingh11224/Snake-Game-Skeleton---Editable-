@@ -1,0 +1,144 @@
+import pygame
+import random # for food spawners
+
+pygame.init()# intializes all functions in pygame
+dis=pygame.display.set_mode((800,600))# display dimentions
+pygame.display.set_caption("Adhiraj's Snake Game")
+pygame.display.update()# refreshes the display
+#defining colours
+red = (128,0,0)
+black = (0,0,0)
+white = (255,255,255)
+gold = (255,215,0)#snake colour 1 (head)
+navy_blue = (5,5,60)#background colour
+silver = (224,224,224)#snake colour 2 (body)
+
+dis.fill(navy_blue)
+#main loop that keeps repeating untill the game is quit
+game_over = False
+
+#logic for the movement of snake
+x = 400
+y = 300
+x_change=0
+y_change=0
+fo=(0,200,255)
+clock=pygame.time.Clock() # helps limit the fps cap
+font_style=pygame.font.SysFont("freesans",25)# fonts imported and used for pop up messages
+lost_img=font_style.render("Skill Issue, Press P: Play again or Q:Quit",True,gold)
+
+#makes the longer snake
+# the first param is the dimension of one element of the snake's body
+def our_snake(snake_block,snake_list):
+    for x in snake_list:
+        pygame.draw.rect(dis,silver,(x[0],x[1],snake_block,snake_block))
+
+def thescore(score):
+    value = font_style.render("Your Score: "+ str(score), True, fo)
+    dis.blit(value,[0,0])
+   
+   
+#give the player the choice to continue or stop playing
+game_close=False
+def game_loop():
+    game_over=False
+    game_close=False
+    x=400
+    y=300
+    x_change=0
+    y_change=0
+   
+    #logic for making the food make the snake longer
+    snake_list=[]
+    length_of_snake=1
+    #coordinates of where the food will spawn, please feel freet to change acc to your screen size
+    foodx=10*random.randint(0,79)
+    foody=10*random.randint(0,59)
+    while(game_over == False):
+        while(game_close==True):
+            dis.fill(black)
+            #displaying the image/message/popUp
+            dis.blit(lost_img,[100,100])
+            pygame.display.update()
+       
+            for event in pygame.event.get():
+                if event.type==pygame.QUIT:
+                        #quit game when cross GUI button in clicked
+                        game_over=True
+                        game_close=False
+                if event.type==pygame.KEYDOWN:
+                    if event.key==pygame.K_q:
+                        #quit game if q pressed on white screen
+                        game_over=True
+                        game_close=False
+               
+                    if event.key==pygame.K_p:
+                        #start over if p pressed on white screen
+                        #call the game loop func
+                        game_loop()
+                   
+               
+   
+        for event in pygame.event.get():
+            if event.type==pygame.QUIT:# if cross is clicked on the game window
+                game_over=True#break the loop to quit the application when close button is clicked
+            #making conditions to check for events to move the snake
+            if event.type==pygame.KEYDOWN:
+                    if event.key==pygame.K_UP:
+                        x_change=0
+                        y_change=-10 #the change of dimentions has to equal the size of the snake head
+               
+                    elif event.key==pygame.K_DOWN:
+                        x_change=0
+                        y_change=10
+               
+                    elif event.key==pygame.K_RIGHT:
+                        x_change=10
+                        y_change=0
+                   
+                    elif event.key==pygame.K_LEFT:
+                        x_change=-10
+                        y_change=0
+   
+        #stop when game when the snake exits the boundaries
+        if x>=800 or x<0 or y>=600 or y<0:
+            game_close=True
+        #new position for head          
+        x=x+x_change
+        y=y+y_change
+        dis.fill(navy_blue)
+       
+        #pygame.draw.rect(dis,gold,(x,y,10,10)) # drawing an object
+        pygame.draw.rect(dis,fo,(foodx,foody,10,10))
+        #make snake longer
+        snake_head=[]
+        snake_head.append(x)
+        snake_head.append(y)
+        snake_list.append(snake_head)
+        if len(snake_list)>length_of_snake:
+            del snake_list[0] # delete since the snake has more positions than it should have
+           
+        #game ends if snake eats itself
+        for i in snake_list[:-1]:
+            if i == snake_head:#coord matches
+                game_close=True
+        our_snake(10,snake_list)
+       
+        #make snake longer when snake position coordinates match up with food coordinates
+        if x==foodx and y==foody:
+            length_of_snake+=1
+            #make new food position
+            foodx=10*random.randint(0,79)
+            foody=10*random.randint(0,59)
+       
+        thescore(length_of_snake-1)
+           
+        pygame.display.update()# refreshes the display//applies the changes
+        # i.e if the snake ate only one food the list should have only two elements 1. for the head
+        # and 2. for the body gained from eating the food
+        clock.tick(15) #30 FPS CAP OR SNAKE SPEED
+   
+   
+   
+    pygame.quit()# when we want to quit the display, this function re-initializes evrything
+game_loop()#when code is run for the first timee
